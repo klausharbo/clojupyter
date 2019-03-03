@@ -13,7 +13,14 @@ Here's an animated GIF showing the PoC in action:
 
 ## To try it
 
-* Add `nbextensions` to Jupyter: `conda install -c conda-forge jupyter_contrib_nbextensions``
+* Install the version of clojupyter contained in this branch:
+```
+git clone git@github.com:klausharbo/clojupyter.git clojupyter-reindent-poc
+cd clojupyter-reindent-poc
+git checkout reindent-poc
+make && make install
+```
+* Add `nbextensions` to Jupyter: `conda install -c conda-forge jupyter_contrib_nbextensions`
 * Configure `autopep8`:
   * Start Jupyter notebook: `jupyter notebook`
   * In Jupyter file browser: Select `Nbextensions` tab (or go to URL `http://localhost:8888/tree#nbextensions_configurator`)
@@ -40,8 +47,14 @@ Here's an animated GIF showing the PoC in action:
   * Select the *Files* tab
   * Optional: Go back to *Nbextensions* tab, select `autopep8`, and verify that your configuration changes have take effect:
     `autopep8` is enabled and the text you inserted is visible in '*json defining...*' section.
-  * Open a Jupyter document with this version of the clojupyter kernel
-  * `autopep8` should have added a new icon in the Jupyter toolbar: An icon showing a hammer.
+ 
+* Open a Jupyter document with this version of the clojupyter kernel
+* Make sure that it is running the new kernel:
+  ```
+  clojupyter.misc.util/reformat-form
+  ```
+  should return a function value.
+* `autopep8` should have added a new icon in the Jupyter toolbar: An icon showing a hammer.
   * Evaluate a cell to verify that the kernel is running
   * Select a cell with Clojure code that needs reformatting / autoindenting.  (In this version the cell must contain a single
     form. It should not be hard to extend this for arbitrary cells containing well-formed Clojure, less sure at this point if
