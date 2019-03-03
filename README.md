@@ -4,7 +4,8 @@
 
 This is an **experimental branch** of clojupyter showing a proof-of-concept (PoC) for supporting automatic reformatting of Jupyter cells containing Clojure code.
 
-This PoC is based on cells based on [Code Prettify](https://jupyter-contrib-nbextensions.readthedocs.io/en/latest/nbextensions/code_prettify/README_code_prettify.html) / [Autopep8](https://github.com/kenkoooo/jupyter-autopep8).
+This PoC is based on 
+[Code Prettify](https://jupyter-contrib-nbextensions.readthedocs.io/en/latest/nbextensions/code_prettify/README_code_prettify.html) / [Autopep8](https://github.com/kenkoooo/jupyter-autopep8).
 
 Here's an animated GIF showing the PoC in action:
 
@@ -48,6 +49,28 @@ Here's an animated GIF showing the PoC in action:
   * Click the `autopep8` icon (the hammer icon).
   * The cell should update to contain nicely formatted Clojure code.
 
+## Implementation
+
+The implementation of this is embarrassingly simple, literally 2 lines of code (in `util.clj`)
+
+```
+(def reformat-form
+  (rcomp read-string zp/zprint-str pr-str println)) 
+```
+
+and adding `autopep8` configuration to cause Jupyter to invoke `reformat-form`:
+
+```
+"clojure": {
+   "library": "(str)",
+   "prefix":  "(clojupyter.misc.util/reformat-form ",
+   "postfix": " )"
+}
+```
+
+as described above.  So there's no new communication with the kernel, the Jupyter extension simply cause evaluation of an expression which calculates the new content.  There may be downsides to this rather simplistic approach, but it's very effective and means that the extension can work with any kernel.
+
+**End of PoC**
 ---------------------------------------
 
 
