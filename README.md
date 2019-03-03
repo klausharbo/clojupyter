@@ -2,9 +2,13 @@
 
 ## Auto-Reindent Proof-of-Concept
 
-This is an **experimental branch** of clojupyter showing a proof-of-concept for supporting automatic reformatting of Jupyter cells containing Clojure code.
+This is an **experimental branch** of clojupyter showing a proof-of-concept (PoC) for supporting automatic reformatting of Jupyter cells containing Clojure code.
 
-This proof-of-concept is based on cells based on [Code Prettify](https://jupyter-contrib-nbextensions.readthedocs.io/en/latest/nbextensions/code_prettify/README_code_prettify.html) / [Autopep8](https://github.com/kenkoooo/jupyter-autopep8).
+This PoC is based on cells based on [Code Prettify](https://jupyter-contrib-nbextensions.readthedocs.io/en/latest/nbextensions/code_prettify/README_code_prettify.html) / [Autopep8](https://github.com/kenkoooo/jupyter-autopep8).
+
+Here's an animated GIF showing the PoC in action:
+
+<img src="https://github.com/klausharbo/clojupyter/blob/reindent-poc/images/2019-03-03%20clojupyter%20autoindent%20poc.gif" width="50%"/>
 
 ## To try it
 
