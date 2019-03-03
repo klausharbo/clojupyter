@@ -2,7 +2,7 @@
 
 ## Auto-Reindent Proof-of-Concept
 
-This is an **experimental branch** of clojupyter showing a proof-of-concept (PoC) for supporting automatic reformatting of Jupyter cells containing Clojure code.
+This is an **experimental branch** of clojupyter showing a proof-of-concept (PoC) for supporting automatic reformatting of Jupyter cells containing Clojure code.  Jupyter supports rudimentary indenting support out-of-the-box, in the client.  It is, however, not a very good solution for a Lisp-family language like Clojure.  This PoC shows leveraging the kernel to reformat cells.
 
 This PoC is based on 
 [Code Prettify](https://jupyter-contrib-nbextensions.readthedocs.io/en/latest/nbextensions/code_prettify/README_code_prettify.html) / [Autopep8](https://github.com/kenkoooo/jupyter-autopep8).
@@ -72,9 +72,11 @@ and adding `autopep8` configuration to cause Jupyter to invoke `reformat-form`:
 
 as described above.  So there's no new communication with the kernel, the Jupyter extension simply causes evaluation of an expression which calculates the new content.  There may be downsides to this rather simplistic approach, but it's very effective and means that the extension can work with any kernel.
 
-`reformat-form` is clearly much too simple, as it probably shouldn't do `read-string` but rather format the *text* of the cell as this will (I presume, judging from a cursory look at the `zprint` docs) preserve comments and forms skipped by the reader.
+`reformat-form` is clearly much too simple, as it probably shouldn't do `read-string` but rather format the *text* of the cell as this will (I presume, judging from a cursory look at the `zprint` docs) preserve comments and forms skipped by the reader.  It's not clear that `zprint` is the best solution for the actual formatting, but it does a decent job for now.  Clearly any proper support would allow the use to control which library to be used for code formatting, and provide ways to control its configuration.
 
-This approach does in fact not require anything from the kernel so any user can in fact accomplish this be defining `reformat-form` in their Jupyter notebook.
+**Note**: This approach does in fact not require anything from the kernel so any user can in fact accomplish this be defining `reformat-form` in their Jupyter notebook.
+
+
 
 **End of PoC**
 ---------------------------------------
