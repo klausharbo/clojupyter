@@ -87,7 +87,7 @@ as described above.  So there's no new communication with the kernel, the Jupyte
 
 `reformat-form` is clearly much too simple, as it probably shouldn't do `read-string` but rather format the *text* of the cell as this will (I presume, judging from a cursory look at the `zprint` docs) preserve comments and forms skipped by the reader.  It's not clear that `zprint` is the best solution for the actual formatting, but it does a decent job for now.  Clearly any proper support would allow the use to control which library to be used for code formatting, and provide ways to control its configuration.
 
-**Note**: This approach does in fact not require anything from the kernel so any user can in fact accomplish this be defining `reformat-form` in their Jupyter notebook.
+**Note**: This approach does in fact not require anything from the kernel so any user can in fact accomplish this be defining something similar to `reformat-form` in their Jupyter notebook.
 
 
 
