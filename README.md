@@ -49,6 +49,8 @@ Here's an animated GIF showing the PoC in action:
   * Click the `autopep8` icon (the hammer icon).
   * The cell should update to contain nicely formatted Clojure code.
 
+I imagine there's a way to accomplish the above much simpler using the command line, but I don't know how (yet).
+
 ## Implementation
 
 The implementation of this is embarrassingly simple, literally 2 lines of code (in `util.clj`)
@@ -69,6 +71,10 @@ and adding `autopep8` configuration to cause Jupyter to invoke `reformat-form`:
 ```
 
 as described above.  So there's no new communication with the kernel, the Jupyter extension simply causes evaluation of an expression which calculates the new content.  There may be downsides to this rather simplistic approach, but it's very effective and means that the extension can work with any kernel.
+
+`reformat-form` is clearly much too simple, as it probably shouldn't do `read-string` but rather format the *text* of the cell as this will (I presume, judging from a cursory look at the `zprint` docs) preserve comments and forms skipped by the reader.
+
+This approach does in fact not require anything from the kernel so any user can in fact accomplish this be defining `reformat-form` in their Jupyter notebook.
 
 **End of PoC**
 ---------------------------------------
