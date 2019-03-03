@@ -68,7 +68,7 @@ and adding `autopep8` configuration to cause Jupyter to invoke `reformat-form`:
 }
 ```
 
-as described above.  So there's no new communication with the kernel, the Jupyter extension simply cause evaluation of an expression which calculates the new content.  There may be downsides to this rather simplistic approach, but it's very effective and means that the extension can work with any kernel.
+as described above.  So there's no new communication with the kernel, the Jupyter extension simply causes evaluation of an expression which calculates the new content.  There may be downsides to this rather simplistic approach, but it's very effective and means that the extension can work with any kernel.
 
 **End of PoC**
 ---------------------------------------
