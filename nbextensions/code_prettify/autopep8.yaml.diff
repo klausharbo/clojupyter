@@ -1,0 +1,6 @@
+60a61,65
+>         },
+>         "clojure": {
+>             "library": "(str)",
+>             "prefix":  "(clojupyter.misc.util/reformat-form ",
+>             "postfix": " )"

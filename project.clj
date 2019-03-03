@@ -20,7 +20,8 @@
                  [org.zeromq/cljzmq 		"0.1.4" :exclusions [org.zeromq/jzmq]]
                  [org.zeromq/jeromq 		"0.5.0"]
                  [pandect			"0.6.1"]
-                 [hiccup 			"1.0.5"]]
+                 [hiccup 			"1.0.5"]
+                 [zprint			"0.4.15"]]
   :aot [clojupyter.core]
   :main clojupyter.core
   :jvm-opts ["-Xmx2000m"]

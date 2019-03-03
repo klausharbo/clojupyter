@@ -1,9 +1,12 @@
 (ns clojupyter.misc.util
   (:require
-   [clojure.pprint			:as pp]
-   [net.cgrand.sjacket.parser		:as p]
-   [clj-time.core			:as time]
-   [clj-time.format			:as time-format]))
+   [clj-time.core				:as time]
+   [clj-time.format				:as time-format]
+   [clojure.pprint				:as pp]
+   [net.cgrand.sjacket.parser			:as p]
+   [taoensso.timbre				:as log]
+   [zprint.core					:as zp]
+   ))
 
 (defn uuid
   []
@@ -25,3 +28,6 @@
 (defn rcomp
   [& fs]
   (apply comp (reverse fs)))
+
+(def reformat-form
+  (rcomp read-string zp/zprint-str pr-str println)) 
