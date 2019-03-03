@@ -1,7 +1,55 @@
+
+
+## Auto-Reindent Proof-of-Concept
+
+This is an **experimental branch** of clojupyter showing a proof-of-concept for supporting automatic reformatting of Jupyter cells containing Clojure code.
+
+This proof-of-concept is based on cells based on [Code Prettify](https://jupyter-contrib-nbextensions.readthedocs.io/en/latest/nbextensions/code_prettify/README_code_prettify.html) / [Autopep8](https://github.com/kenkoooo/jupyter-autopep8).
+
+## To try it
+
+* Add `nbextensions` to Jupyter: `conda install -c conda-forge jupyter_contrib_nbextensions``
+* Configure `autopep8`:
+  * Start Jupyter notebook: `jupyter notebook`
+  * In Jupyter file browser: Select `Nbextensions` tab (or go to URL `http://localhost:8888/tree#nbextensions_configurator`)
+  * Select `Autopep8`
+  * Press `Enable`(blue button) if it not already enabled
+  * In the section beginning with the text '*json defining library calls required to load*' add the text
+  
+    ```
+    {
+      "python": {
+        "library": "import json\nimport autopep8",
+        "prefix": "print(json.dumps(autopep8.fix_code(u",
+        "postfix": ")))"
+      },
+      "clojure": {
+        "library": "(str)",
+        "prefix":  "(clojupyter.misc.util/reformat-form ",
+        "postfix": " )"
+      }
+    }
+    ```
+    The exact text to insert (for `Anaconda3-2018.12`) can be found in `./nbextensions/code_prettify/autopep8.yaml`.
+  * **Note**: For the change to take effect it appears that you must click outside the text editing area.
+  * Select the *Files* tab
+  * Optional: Go back to *Nbextensions* tab, select `autopep8`, and verify that your configuration changes have take effect:
+    `autopep8` is enabled and the text you inserted is visible in '*json defining...*' section.
+  * Open a Jupyter document with this version of the clojupyter kernel
+  * `autopep8` should have added a new icon in the Jupyter toolbar: An icon showing a hammer.
+  * Evaluate a cell to verify that the kernel is running
+  * Select a cell with Clojure code that needs reformatting / autoindenting.  (In this version the cell must contain a single
+    form. It should not be hard to extend this for arbitrary cells containing well-formed Clojure, less sure at this point if
+    reindenting syntactically incorrect cells will work, maybe not.)
+  * Click the `autopep8` icon (the hammer icon).
+  * The cell should update to contain nicely formatted Clojure code.
+
+---------------------------------------
+
+
 # clojupyter
 A Jupyter kernel for Clojure. This will let you run Clojure code from the
 Jupyter console and notebook.
-
 [![Build Status](https://travis-ci.org/clojupyter/clojupyter.svg?branch=master)](https://travis-ci.org/clojupyter/clojupyter)
 
 ![clojupyter](https://raw.github.com/roryk/clojupyter/master/images/demo.png)
