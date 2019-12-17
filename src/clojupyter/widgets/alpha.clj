@@ -16,7 +16,13 @@
    [io.simplect.compose.action :as act :refer [action side-effect step]]
    [clojure.string :as str]))
 
-(use 'clojure.pprint)
+;; The strings specifying the widgets are Emacs Org-Mode tables.  They were created by pasting data
+;; from the tables in
+;;
+;;     https://github.com/jupyter-widgets/ipywidgets/blob/master/packages/schema/jupyterwidgetmodels.latest.md
+;;
+;; from Goole Chrome into Emacs and subsequently processed by Emacs using
+;; `org-table-create-or-convert-from-region` (`C-c |` in `org-mode`, but can be done in any mode).
 
 (def WIDGET-TARGET "jupyter.widget")
 
@@ -163,7 +169,7 @@
 ;;; ------------------------------------------------------------------------------------------------------------------------
 
 (defwidget ;; layout
-  "
+"
 | Attribute             | Type                                                                                                                                                  | Default                 | Help                                                             |
 | _model_module         | string                                                                                                                                                | '@jupyter-widgets/base' | The namespace for the model.                                     |
 | _model_module_version | string                                                                                                                                                | '1.2.0'                 | A semver requirement for namespace version containing the model. |
@@ -213,7 +219,7 @@
 ")
 
 (defwidget ;; accordion
-  "
+"
 | Attribute             | Type                                                       | Default                     | Help                                                                                                                              |
 | _dom_classes          | array of string                                            | []                          | CSS classes applied to widget DOM element                                                                                         |
 | _model_module         | string                                                     | '@jupyter-widgets/controls' |                                                                                                                                   |
@@ -230,7 +236,7 @@
 ")
 
 (defwidget ;; audio
-  "
+"
 | Attribute             | Type                       | Default                     | Help                                                                                |
 | _dom_classes          | array of string            | []                          | CSS classes applied to widget DOM element                                           |
 | _model_module         | string                     | '@jupyter-widgets/controls' |                                                                                     |
@@ -248,7 +254,7 @@
 ")
 
 (defwidget ;; bounded-float-text
-  "
+"
 | Attribute             | Type                                 | Default                     | Help                                                                                                         |
 | _dom_classes          | array of string                      | []                          | CSS classes applied to widget DOM element                                                                    |
 | _model_module         | string                               | '@jupyter-widgets/controls' |                                                                                                              |
@@ -270,7 +276,7 @@
 ")
 
 (defwidget ;; bounded-int-text
-  "
+"
 | Attribute             | Type                                 | Default                     | Help                                                                                                         |
 | _dom_classes          | array of string                      | []                          | CSS classes applied to widget DOM element                                                                    |
 | _model_module         | string                               | '@jupyter-widgets/controls' |                                                                                                              |
@@ -292,7 +298,7 @@
 ")
 
 (defwidget ;; box
-  "
+"
 | Attribute             | Type                                                       | Default                     | Help                                      |
 | _dom_classes          | array of string                                            | []                          | CSS classes applied to widget DOM element |
 | _model_module         | string                                                     | '@jupyter-widgets/controls' |                                           |
@@ -307,7 +313,7 @@
 ")
 
 (defwidget ;; button
-  "
+"
 | Attribute             | Type                                                                  | Default                     | Help                                              |
 | _dom_classes          | array of string                                                       | []                          | CSS classes applied to widget DOM element         |
 | _model_module         | string                                                                | '@jupyter-widgets/controls' |                                                   |
@@ -326,7 +332,7 @@
 ")
 
 (defwidget ;; button-style
-  "
+"
 | Attribute             | Type           | Default                     | Help                     |
 | _model_module         | string         | '@jupyter-widgets/controls' |                          |
 | _model_module_version | string         | '1.5.0'                     |                          |
@@ -339,7 +345,7 @@
 ")
 
 (defwidget ;; check-box
-  "
+"
 | Attribute             | Type                                 | Default                     | Help                                                                |
 | _dom_classes          | array of string                      | []                          | CSS classes applied to widget DOM element                           |
 | _model_module         | string                               | '@jupyter-widgets/controls' |                                                                     |
@@ -358,7 +364,7 @@
 ")
 
 (defwidget ;; color-picker
-  "
+"
 | Attribute             | Type                                 | Default                     | Help                                                   |
 | _dom_classes          | array of string                      | []                          | CSS classes applied to widget DOM element              |
 | _model_module         | string                               | '@jupyter-widgets/controls' |                                                        |
@@ -377,7 +383,7 @@
 ")
 
 (defwidget ;; combobox
-  "
+"
 | Attribute             | Type                                 | Default                     | Help                                                                                                         |
 | _dom_classes          | array of string                      | []                          | CSS classes applied to widget DOM element                                                                    |
 | _model_module         | string                               | '@jupyter-widgets/controls' |                                                                                                              |
@@ -399,7 +405,7 @@
 ")
 
 (defwidget ;; controller-axis 
-  "
+"
 | Attribute             | Type                       | Default                     | Help                                      |
 | _dom_classes          | array of string            | []                          | CSS classes applied to widget DOM element |
 | _model_module         | string                     | '@jupyter-widgets/controls' |                                           |
@@ -413,7 +419,7 @@
 ")
 
 (defwidget ;; controller 
-  "
+"
 | Attribute             | Type                                | Default                     | Help                                                  |
 | _dom_classes          | array of string                     | []                          | CSS classes applied to widget DOM element             |
 | _model_module         | string                              | '@jupyter-widgets/controls' |                                                       |
@@ -433,7 +439,7 @@
 ")
 
 (defwidget ;; dom-widget 
-  "
+"
 | Attribute             | Type                       | Default                     | Help                                      |
 | _dom_classes          | array of string            | []                          | CSS classes applied to widget DOM element |
 | _model_module         | string                     | '@jupyter-widgets/controls' |                                           |
@@ -447,7 +453,7 @@
 ")
 
 (defwidget ;; date-picket 
-  "
+"
 | Attribute             | Type                                 | Default                     | Help                                                   |
 | _dom_classes          | array of string                      | []                          | CSS classes applied to widget DOM element              |
 | _model_module         | string                               | '@jupyter-widgets/controls' |                                                        |
@@ -465,7 +471,7 @@
 ")
 
 (defwidget ;; description-style 
-  "
+"
 | Attribute             | Type   | Default                     | Help                                                 |
 | _model_module         | string | '@jupyter-widgets/controls' |                                                      |
 | _model_module_version | string | '1.5.0'                     |                                                      |
@@ -477,7 +483,7 @@
 ")
 
 (defwidget ;; directional-link 
-  "
+"
 | Attribute             | Type           | Default                     | Help                                   |
 | _model_module         | string         | '@jupyter-widgets/controls' |                                        |
 | _model_module_version | string         | '1.5.0'                     |                                        |
@@ -490,7 +496,7 @@
 ")
 
 (defwidget ;; dropdown 
-  "
+"
 | Attribute             | Type                                 | Default                     | Help                                                   |
 | _dom_classes          | array of string                      | []                          | CSS classes applied to widget DOM element              |
 | _model_module         | string                               | '@jupyter-widgets/controls' |                                                        |
@@ -509,7 +515,7 @@
 ")
 
 (defwidget ;; file-upload 
-  "
+"
 | Attribute             | Type                                                                  | Default                     | Help                                                   |
 | _counter              | number (integer)                                                      | 0                           |                                                        |
 | _dom_classes          | array of string                                                       | []                          | CSS classes applied to widget DOM element              |
@@ -534,7 +540,7 @@
 ")
 
 (defwidget ;; float-log-slider 
-  "
+"
 | Attribute             | Type                                     | Default                     | Help                                                              |
 | _dom_classes          | array of string                          | []                          | CSS classes applied to widget DOM element                         |
 | _model_module         | string                                   | '@jupyter-widgets/controls' |                                                                   |
@@ -559,8 +565,8 @@
 | value                 | number (float)                           | 1.0                         | Float value                                                       |
 ")
 
-(defwidget ;; float-progress-model 
-  "
+(defwidget ;; float-progress
+"
 | Attribute             | Type                                                               | Default                     | Help                                                   |
 | _dom_classes          | array of string                                                    | []                          | CSS classes applied to widget DOM element              |
 | _model_module         | string                                                             | '@jupyter-widgets/controls' |                                                        |
@@ -581,7 +587,7 @@
 ")
 
 (defwidget ;; float-range-slider 
-  "
+"
 | Attribute             | Type                                     | Default                     | Help                                                              |
 | _dom_classes          | array of string                          | []                          | CSS classes applied to widget DOM element                         |
 | _model_module         | string                                   | '@jupyter-widgets/controls' |                                                                   |
@@ -606,7 +612,7 @@
 ")
 
 (defwidget ;; float-slider 
-  "
+"
 | Attribute             | Type                                     | Default                     | Help                                                              |
 | _dom_classes          | array of string                          | []                          | CSS classes applied to widget DOM element                         |
 | _model_module         | string                                   | '@jupyter-widgets/controls' |                                                                   |
@@ -631,7 +637,7 @@
 ")
 
 (defwidget ;; float-text 
-  "
+"
 | Attribute             | Type                                 | Default                     | Help                                                                                                         |
 | _dom_classes          | array of string                      | []                          | CSS classes applied to widget DOM element                                                                    |
 | _model_module         | string                               | '@jupyter-widgets/controls' |                                                                                                              |
@@ -651,7 +657,7 @@
 ")
 
 (defwidget ;; grid-box 
-  "
+"
 | Attribute             | Type                                                       | Default                     | Help                                      |
 | _dom_classes          | array of string                                            | []                          | CSS classes applied to widget DOM element |
 | _model_module         | string                                                     | '@jupyter-widgets/controls' |                                           |
@@ -665,8 +671,8 @@
 | layout                | reference to Layout widget                                 | reference to new instance   |                                           |
 ")
 
-(defwidget ;; hbox 
-  "
+(defwidget ;; h-box 
+"
 | Attribute             | Type                                                       | Default                     | Help                                      |
 | _dom_classes          | array of string                                            | []                          | CSS classes applied to widget DOM element |
 | _model_module         | string                                                     | '@jupyter-widgets/controls' |                                           |
@@ -680,8 +686,8 @@
 | layout                | reference to Layout widget                                 | reference to new instance   |                                           |
 ")
 
-(defwidget ;; html-math-model 
-  "
+(defwidget ;; html-math 
+"
 | Attribute             | Type                                 | Default                     | Help                                                    |
 | _dom_classes          | array of string                      | []                          | CSS classes applied to widget DOM element               |
 | _model_module         | string                               | '@jupyter-widgets/controls' |                                                         |
@@ -699,7 +705,7 @@
 ")
 
 (defwidget ;; html 
-  "
+"
 | Attribute             | Type                                 | Default                     | Help                                                    |
 | _dom_classes          | array of string                      | []                          | CSS classes applied to widget DOM element               |
 | _model_module         | string                               | '@jupyter-widgets/controls' |                                                         |
@@ -717,7 +723,7 @@
 ")
 
 (defwidget ;; image 
-  "
+"
 | Attribute             | Type                       | Default                     | Help                                                                     |
 | _dom_classes          | array of string            | []                          | CSS classes applied to widget DOM element                                |
 | _model_module         | string                     | '@jupyter-widgets/controls' |                                                                          |
@@ -734,7 +740,7 @@
 ")
 
 (defwidget ;; int-progress 
-  "
+"
 | Attribute             | Type                                                       | Default                     | Help                                                   |
 | _dom_classes          | array of string                                            | []                          | CSS classes applied to widget DOM element              |
 | _model_module         | string                                                     | '@jupyter-widgets/controls' |                                                        |
@@ -755,7 +761,7 @@
 ")
 
 (defwidget ;; int-range-slider 
-  "
+"
 | Attribute             | Type                                     | Default                     | Help                                                              |
 | _dom_classes          | array of string                          | []                          | CSS classes applied to widget DOM element                         |
 | _model_module         | string                                   | '@jupyter-widgets/controls' |                                                                   |
@@ -779,8 +785,8 @@
 | value                 | array                                    | [0, 1]                      | Tuple of (lower, upper) bounds                                    |
 ")
 
-(defwidget ;; int-slider-model 
-  "
+(defwidget ;; int-slider
+"
 | Attribute             | Type                                     | Default                     | Help                                                              |
 | _dom_classes          | array of string                          | []                          | CSS classes applied to widget DOM element                         |
 | _model_module         | string                                   | '@jupyter-widgets/controls' |                                                                   |
@@ -805,7 +811,7 @@
 ")
 
 (defwidget ;; int-text 
-  "
+"
 | Attribute             | Type                                 | Default                     | Help                                                                                                         |
 | _dom_classes          | array of string                      | []                          | CSS classes applied to widget DOM element                                                                    |
 | _model_module         | string                               | '@jupyter-widgets/controls' |                                                                                                              |
@@ -825,7 +831,7 @@
 ")
 
 (defwidget ;; label 
-  "
+"
 | Attribute             | Type                                 | Default                     | Help                                                    |
 | _dom_classes          | array of string                      | []                          | CSS classes applied to widget DOM element               |
 | _model_module         | string                               | '@jupyter-widgets/controls' |                                                         |
@@ -843,7 +849,7 @@
 ")
 
 (defwidget ;; link 
-  "
+"
 | Attribute             | Type           | Default                     | Help                                   |
 | _model_module         | string         | '@jupyter-widgets/controls' |                                        |
 | _model_module_version | string         | '1.5.0'                     |                                        |
@@ -856,7 +862,7 @@
 ")
 
 (defwidget ;; password 
-  "
+"
 | Attribute             | Type                                 | Default                     | Help                                                                                                         |
 | _dom_classes          | array of string                      | []                          | CSS classes applied to widget DOM element                                                                    |
 | _model_module         | string                               | '@jupyter-widgets/controls' |                                                                                                              |
@@ -876,7 +882,7 @@
 ")
 
 (defwidget ;; play 
-  "
+"
 | Attribute             | Type                                 | Default                     | Help                                                   |
 | _dom_classes          | array of string                      | []                          | CSS classes applied to widget DOM element              |
 | _model_module         | string                               | '@jupyter-widgets/controls' |                                                        |
@@ -901,7 +907,7 @@
 ")
 
 (defwidget ;; progress-style 
-  "
+"
 | Attribute             | Type           | Default                     | Help                                                 |
 | _model_module         | string         | '@jupyter-widgets/controls' |                                                      |
 | _model_module_version | string         | '1.5.0'                     |                                                      |
@@ -914,7 +920,7 @@
 ")
 
 (defwidget ;; radio-buttons 
-  "
+"
 | Attribute             | Type                                 | Default                     | Help                                                   |
 | _dom_classes          | array of string                      | []                          | CSS classes applied to widget DOM element              |
 | _model_module         | string                               | '@jupyter-widgets/controls' |                                                        |
@@ -933,7 +939,7 @@
 ")
 
 (defwidget ;; select 
-  "
+"
 | Attribute             | Type                                 | Default                     | Help                                                   |
 | _dom_classes          | array of string                      | []                          | CSS classes applied to widget DOM element              |
 | _model_module         | string                               | '@jupyter-widgets/controls' |                                                        |
@@ -953,7 +959,7 @@
 ")
 
 (defwidget ;; select-multiple 
-  "
+"
 | Attribute             | Type                                 | Default                     | Help                                                   |
 | _dom_classes          | array of string                      | []                          | CSS classes applied to widget DOM element              |
 | _model_module         | string                               | '@jupyter-widgets/controls' |                                                        |
@@ -973,7 +979,7 @@
 ")
 
 (defwidget ;; selection-range-slider 
-  "
+"
 | Attribute             | Type                                     | Default                     | Help                                                              |
 | _dom_classes          | array of string                          | []                          | CSS classes applied to widget DOM element                         |
 | _model_module         | string                                   | '@jupyter-widgets/controls' |                                                                   |
@@ -995,7 +1001,7 @@
 ")
 
 (defwidget ;; selection-slider 
-  "
+"
 | Attribute             | Type                                     | Default                     | Help                                                              |
 | _dom_classes          | array of string                          | []                          | CSS classes applied to widget DOM element                         |
 | _model_module         | string                                   | '@jupyter-widgets/controls' |                                                                   |
@@ -1017,7 +1023,7 @@
 ")
 
 (defwidget ;; slider-style 
-  "
+"
 | Attribute             | Type           | Default                     | Help                                                 |
 | _model_module         | string         | '@jupyter-widgets/controls' |                                                      |
 | _model_module_version | string         | '1.5.0'                     |                                                      |
@@ -1030,7 +1036,7 @@
 ")
 
 (defwidget ;; tab 
-  "
+"
 | Attribute             | Type                                                       | Default                     | Help                                                                                                                              |
 | _dom_classes          | array of string                                            | []                          | CSS classes applied to widget DOM element                                                                                         |
 | _model_module         | string                                                     | '@jupyter-widgets/controls' |                                                                                                                                   |
@@ -1047,7 +1053,7 @@
 ")
 
 (defwidget ;; text 
-  "
+"
 | Attribute             | Type                                 | Default                     | Help                                                                                                         |
 | _dom_classes          | array of string                      | []                          | CSS classes applied to widget DOM element                                                                    |
 | _model_module         | string                               | '@jupyter-widgets/controls' |                                                                                                              |
@@ -1067,7 +1073,7 @@
 ")
 
 (defwidget ;; textarea 
-  "
+"
 | Attribute             | Type                                 | Default                     | Help                                                                                                         |
 | _dom_classes          | array of string                      | []                          | CSS classes applied to widget DOM element                                                                    |
 | _model_module         | string                               | '@jupyter-widgets/controls' |                                                                                                              |
@@ -1088,7 +1094,7 @@
 ")
 
 (defwidget ;; toggle-button 
-  "
+"
 | Attribute             | Type                                                                  | Default                     | Help                                                   |
 | _dom_classes          | array of string                                                       | []                          | CSS classes applied to widget DOM element              |
 | _model_module         | string                                                                | '@jupyter-widgets/controls' |                                                        |
@@ -1109,7 +1115,7 @@
 ")
 
 (defwidget ;; toggle-buttons 
-  "
+"
 | Attribute             | Type                                                                          | Default                     | Help                                                                    |
 | _dom_classes          | array of string                                                               | []                          | CSS classes applied to widget DOM element                               |
 | _model_module         | string                                                                        | '@jupyter-widgets/controls' |                                                                         |
@@ -1130,8 +1136,8 @@
 | tooltips              | array of string                                                               | []                          | Tooltips for each button.                                               |
 ")
 
-(defwidget ;; vbox 
-  "
+(defwidget ;; v-box 
+"
 | Attribute             | Type                                                       | Default                     | Help                                      |
 | _dom_classes          | array of string                                            | []                          | CSS classes applied to widget DOM element |
 | _model_module         | string                                                     | '@jupyter-widgets/controls' |                                           |
@@ -1146,7 +1152,7 @@
 ")
 
 (defwidget ;; valid 
-  "
+"
 | Attribute             | Type                                 | Default                     | Help                                                   |
 | _dom_classes          | array of string                      | []                          | CSS classes applied to widget DOM element              |
 | _model_module         | string                               | '@jupyter-widgets/controls' |                                                        |
@@ -1165,7 +1171,7 @@
 ")
 
 (defwidget ;; video 
-  "
+"
 | Attribute             | Type                       | Default                     | Help                                                                                |
 | _dom_classes          | array of string            | []                          | CSS classes applied to widget DOM element                                           |
 | _model_module         | string                     | '@jupyter-widgets/controls' |                                                                                     |
@@ -1185,7 +1191,7 @@
 ")
 
 (defwidget ;; output 
-  "
+"
 | Attribute             | Type                       | Default                   | Help                                          |
 | _dom_classes          | array of string            | []                        | CSS classes applied to widget DOM element     |
 | _model_module         | string                     | '@jupyter-widgets/output' |                                               |
