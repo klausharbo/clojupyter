@@ -239,38 +239,17 @@
 (defn extract-kernel-response-byte-arrays
   "Returns the result of extract any byte-arrays from messages with COMM state."
   [{:keys [rsp-content] :as kernel-rsp}]
-  (log/error "EXTRACT")
   (let [state-path  [:data :state]
         bufpath-path [:data :buffer_paths]]
-    (try (if-let [state (get-in rsp-content state-path)]
-           (let [[state' pathmap] (try (leaf-paths bytes? (constantly "replaced") state)
-                                       (catch Exception e
-                                         (str "Failed: " e)))
-                 paths (vec (keys pathmap))
-                 buffers (mapv (p get pathmap) paths)
-                 buffer-paths (get-in rsp-content bufpath-path)
-                 rsp-content' (-> rsp-content
-                                  (assoc-in state-path state')
-                                  (assoc-in bufpath-path paths))
-                 buffer-paths' (get-in rsp-content' bufpath-path)]
-             (log/debug "extract - state" (log/ppstr {;:state state
-                                                      ;;:state' state'
-                                                      :rsp-content' rsp-content'
-                                                      :bufcount (count buffers)
-                                                      ;;:paths paths
-                                                      ;:buffers buffers
-                                                      ;:buffer-paths buffer-paths
-                                                      ;:buffer-paths' buffer-paths'
-                                                      ;;:pathmap pathmap
-                                                      ;;:kernel-rsp kernel-rsp
-                                                      }))
-             (assoc kernel-rsp :rsp-content rsp-content' :rsp-buffers buffers))
-           (do
-             (log/debug "extract - no state")
-             kernel-rsp))
-         (catch Exception e
-           (do (log/error "Error in extract: " e)
-               kernel-rsp)))))
+    (if-let [state (get-in rsp-content state-path)]
+      (let [[state' pathmap] (leaf-paths bytes? (constantly "replaced") state)
+            paths (vec (keys pathmap))
+            buffers (mapv (p get pathmap) paths)
+            rsp-content' (-> rsp-content
+                             (assoc-in state-path state')
+                             (assoc-in bufpath-path paths))]
+        (assoc kernel-rsp :rsp-content rsp-content' :rsp-buffers buffers))
+      kernel-rsp)))
 
 ;;; ------------------------------------------------------------------------------------------------------------------------
 ;;; FRAMES <-> JUPMSG
