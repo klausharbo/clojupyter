@@ -169,6 +169,74 @@
          (s/assert ::jsp/jupmsg))))
 
 ;;; ------------------------------------------------------------------------------------------------------------------------
+;;; BUFFER EXTRACTION AND INSERTION
+;;; ------------------------------------------------------------------------------------------------------------------------
+
+;;; Klaus Harbo 2019-12-18: The problem of extracting and re-inserting values would probably be
+;;; handled more generally, correctly and succinctly by Specter (cf.
+;;; https://github.com/redplanetlabs/specter).  Specter does, however, employ a complex syntax to
+;;; express its solutions; it does not seem worthwhile to introduce dependency and deal with the
+;;; associated learning curve to solve the buffer extraction and re-insertion problem which can be
+;;; adequately solved by the fairly straightforward code below.
+
+(defn leaf-paths
+  "Recursively traverses `v` replacing elements for which `pred` returns a truthy value with the
+  result of applying `f` to the elements.  Returns a 2-tuple of the result of the replacements and a
+  map of paths to the replaced elements.
+
+  NOTE: The implementation does NOT work correctly for any Clojure value; it is specialised to
+  handle Jupyter messages which are losslessly serializable to JSON.  Extraction only occurs from
+  vectors and maps."
+  [pred f v]
+  (let [T (atom [])]
+    (letfn [(inner [path]
+              (fn [idx v]
+                (let [path' (conj path idx)]
+                  (cond
+                    (vector? v)
+                    ,, (mapv (inner path') (range) v)
+                    (map? v)
+                    ,, (reduce-kv (fn [Σ k v] (assoc Σ k ((inner path') k v))) {} v)
+                    (pred v)
+                    ,, (do (swap! T conj [(-> path' rest vec) v]) ;; :dummy removed by `rest`
+                           (f v))
+                    :else
+                    ,, v))))]
+      [((inner []) :dummy v)
+       (into {} @T)])))
+
+(defn insert-paths
+  "Returns the result of inserting into `jupyter-message` values from vals in `path-value-map` at the
+  point specified by their keys.  `path-value-map` must be a map from paths to values and all paths
+  must refer to insertion points in either maps or vectors.
+
+  Example:
+
+    (let [pred #(and (int? %) (odd? %))
+          replfn (constantly :replaced)
+          value {:a 1, :b [0 1 [1 2 3 {:x [1]}]]}
+          [result paths] (leaf-paths pred replfn value)]
+      [(= value (insert-paths result paths)) ;; <-- The point of `leaf-paths` and `insert-paths`
+       result paths])
+    ;; => 
+    [true 
+     {:a :replaced, :b [0 :replaced [:replaced 2 :replaced {:x [:replaced]}]]}
+     {[:a] 1, [:b 1] 1, [:b 2 0] 1, [:b 2 2] 3, [:b 2 3 :x 0] 1}]
+
+  NOTE: The implementation does NOT work correctly for any Clojure value; it is specialised to
+  handle Jupyter messages which are losslessly serializable to JSON.  Paths can only refer to
+  insertion points in vectors and maps."
+  [jupyter-message path-value-map]
+  (letfn [(insert-by-path [jupyter-message [k & ks] v]
+            (if (or (map? jupyter-message) (vector? jupyter-message))
+              (assoc jupyter-message k (if (seq ks)
+                                         (insert-by-path (get jupyter-message k) ks v)
+                                         v))
+              jupyter-message))]
+    (reduce (fn [Σ [path v]] (insert-by-path Σ path v))
+            jupyter-message path-value-map)))
+
+;;; ------------------------------------------------------------------------------------------------------------------------
 ;;; FRAMES <-> JUPMSG
 ;;; ------------------------------------------------------------------------------------------------------------------------
 
@@ -528,3 +596,5 @@
   (s/cat :data ::data, :metadata ::metadata, :transient ::transient)
   [data metadata tsient]
   {:data data, :metadata metadata, :transient tsient})
+
+
