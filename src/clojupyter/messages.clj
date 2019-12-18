@@ -177,7 +177,7 @@
 ;;; https://github.com/redplanetlabs/specter).  Specter does, however, employ a complex syntax to
 ;;; express its solutions; it does not seem worthwhile to introduce dependency and deal with the
 ;;; associated learning curve to solve the buffer extraction and re-insertion problem which can be
-;;; adequately solved by the fairly straightforward code below.
+;;; adequately solved by the fairly straightforward code in `leaf-paths` and `insert-paths` below.
 
 (defn leaf-paths
   "Recursively traverses `v` replacing elements for which `pred` returns a truthy value with the
@@ -218,7 +218,7 @@
           [result paths] (leaf-paths pred replfn value)]
       [(= value (insert-paths result paths)) ;; <-- The point of `leaf-paths` and `insert-paths`
        result paths])
-    ;; => 
+    ;; =>
     [true 
      {:a :replaced, :b [0 :replaced [:replaced 2 :replaced {:x [:replaced]}]]}
      {[:a] 1, [:b 1] 1, [:b 2 0] 1, [:b 2 2] 3, [:b 2 3 :x 0] 1}]
@@ -235,6 +235,42 @@
               jupyter-message))]
     (reduce (fn [Σ [path v]] (insert-by-path Σ path v))
             jupyter-message path-value-map)))
+
+(defn extract-kernel-response-byte-arrays
+  "Returns the result of extract any byte-arrays from messages with COMM state."
+  [{:keys [rsp-content] :as kernel-rsp}]
+  (log/error "EXTRACT")
+  (let [state-path  [:data :state]
+        bufpath-path [:data :buffer_paths]]
+    (try (if-let [state (get-in rsp-content state-path)]
+           (let [[state' pathmap] (try (leaf-paths bytes? (constantly "replaced") state)
+                                       (catch Exception e
+                                         (str "Failed: " e)))
+                 paths (vec (keys pathmap))
+                 buffers (mapv (p get pathmap) paths)
+                 buffer-paths (get-in rsp-content bufpath-path)
+                 rsp-content' (-> rsp-content
+                                  (assoc-in state-path state')
+                                  (assoc-in bufpath-path paths))
+                 buffer-paths' (get-in rsp-content' bufpath-path)]
+             (log/debug "extract - state" (log/ppstr {;:state state
+                                                      ;;:state' state'
+                                                      :rsp-content' rsp-content'
+                                                      :bufcount (count buffers)
+                                                      ;;:paths paths
+                                                      ;:buffers buffers
+                                                      ;:buffer-paths buffer-paths
+                                                      ;:buffer-paths' buffer-paths'
+                                                      ;;:pathmap pathmap
+                                                      ;;:kernel-rsp kernel-rsp
+                                                      }))
+             (assoc kernel-rsp :rsp-content rsp-content' :rsp-buffers buffers))
+           (do
+             (log/debug "extract - no state")
+             kernel-rsp))
+         (catch Exception e
+           (do (log/error "Error in extract: " e)
+               kernel-rsp)))))
 
 ;;; ------------------------------------------------------------------------------------------------------------------------
 ;;; FRAMES <-> JUPMSG
@@ -295,11 +331,15 @@
           signature	(.-signature preframes)
           _		(assert envelope)
           _		(assert signature)
-          payload-vec	(mapv u/json-str [header parent-header metadata content])]
+          payload-vec	(mapv u/json-str [header parent-header metadata content])
+          byte-buffers	(when buffers
+                          (.-buffers buffers))]
         (assert (s/valid? ::sp/byte-arrays envelope))
+        (log/debug "jupmsg->frames: " [:bufcount (count byte-buffers)])
         (->> (concat envelope
                      [u/IDSMSG-BYTES (u/get-bytes signature)]
-                     (mapv u/get-bytes payload-vec))
+                     (mapv u/get-bytes payload-vec)
+                     byte-buffers)
              vec
              (s/assert ::msp/frames)))))
 
@@ -324,7 +364,7 @@
   ([port signer kernel-rsp]
    (kernelrsp->jupmsg port signer kernel-rsp {}))
   ([port signer
-    {:keys [rsp-content rsp-msgtype rsp-socket rsp-metadata req-message]}
+    {:keys [rsp-content rsp-msgtype rsp-socket rsp-metadata rsp-buffers req-message]}
     {:keys [messageid now] :as opts}]
    (let [messageid	(str (or messageid (u!/uuid)))
          now		(or now (u!/now))
@@ -333,11 +373,12 @@
          header		(make-jupmsg-header messageid rsp-msgtype username session-id now PROTOCOL-VERSION)
          parent-header	(message-header req-message)
          metadata	(or rsp-metadata {})
+         rsp-buffers	(or rsp-buffers [])
          envelope	(if (= rsp-socket :iopub_port)
                           [(u/get-bytes rsp-msgtype)]
                           (message-envelope req-message))
          signature	(u/get-bytes (signer [header parent-header metadata rsp-content]))]
-     (make-jupmsg envelope signature header parent-header metadata rsp-content []))))
+     (make-jupmsg envelope signature header parent-header metadata rsp-content rsp-buffers))))
 
 ;;; ------------------------------------------------------------------------------------------------------------------------
 ;;; MESSAGE CONTENT BUILDERS

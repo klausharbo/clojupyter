@@ -77,9 +77,12 @@
   [port signer]
   (u!/wrap-report-and-absorb-exceptions
    (msgs/transducer-error port)
-   (C (wrap-skip-shutdown-tokens (p msgs/kernelrsp->jupmsg port signer))
+   (C (wrap-skip-shutdown-tokens (C (fn [krsp] (msgs/extract-kernel-response-byte-arrays krsp))
+                                    (fn [krsp] (msgs/kernelrsp->jupmsg port signer krsp))))
       (logging-transducer (str "OUTBOUND:" port))
-      (wrap-skip-shutdown-tokens msgs/jupmsg->frames))))
+      (wrap-skip-shutdown-tokens (fn [jupmsg] (msgs/jupmsg->frames jupmsg))))))
+
+(println "core.clj:			clean up outbound-channel-transducer")
 
 (defn- start-zmq-socket-forwarding
   "Starts threads forwarding traffic between ZeroMQ sockets and core.async channels.  Returns a
