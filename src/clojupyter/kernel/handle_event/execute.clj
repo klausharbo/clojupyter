@@ -59,7 +59,7 @@
                                    (p set/intersection skip-tags)
                                    (p = #{}))
                                 stacktrace)
-          maxlen	(fn [k] (reduce max (map (C k count) relevant)))
+          maxlen	(fn [k] (reduce max 1 (map (C k count) relevant)))
           format-str	(str "%" (maxlen :file) "s: %5d %-" (maxlen :file) "s")]
       (vec (for [{:keys [file line name]} relevant]
              (format format-str file line name))))))
@@ -116,8 +116,8 @@
         (let [{:keys [nrepl-messages
                       trace-result]}	nrepl-eval-result
               exe-count			(state/execute-count)
-              code 				(msgs/message-code req-message)
-              eval-interpretation		((s*interpret-nrepl-eval-results nrepl-messages) {})
+              code 			(msgs/message-code req-message)
+              eval-interpretation	((s*interpret-nrepl-eval-results nrepl-messages) {})
               {:keys [interrupted?
                       stacktrace-strings
                       result stdout
@@ -126,11 +126,11 @@
               silent?			(or (msgs/message-silent req-message) (u/code-empty? code))
               hushed?			(u/code-hushed? code)
               store-history?		(if silent? false (msgs/message-store-history? req-message))
-              reply				(if ename
-                                                  (msgs/execute-reply-content "error" exe-count
-                                                                              {:traceback (collect-stacktrace-strings trace-result),
-                                                                               :ename ename})
-                                                  (msgs/execute-reply-content "ok" exe-count))
+              reply			(if ename
+                                          (msgs/execute-reply-content "error" exe-count
+                                                                      {:traceback (collect-stacktrace-strings trace-result),
+                                                                       :ename ename})
+                                          (msgs/execute-reply-content "ok" exe-count))
               send-step			(fn [sock-kw msgtype message]
                                           (step (fn [S] (send!! jup sock-kw req-message msgtype message) S)
                                                 {:message-to sock-kw :msgtype msgtype :message message}))]

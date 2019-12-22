@@ -125,7 +125,7 @@
 (def prop--values-can-be-extracted-as-paths-and-reinserted-correctly
   (prop/for-all [msg mg/g-jupmsg-any]
     (let [msg (-> msg (dissoc :preframes :buffers))
-          [res paths] (msgs/leaf-paths (constantly true) (constantly :replaced) msg)]
+          [res paths] (msgs/leaf-paths (every-pred (complement map?) (complement vector?)) (constantly :replaced) msg)]
       (and (-> paths count pos?)
            (not= res msg)
            (= msg (msgs/insert-paths res paths))))))

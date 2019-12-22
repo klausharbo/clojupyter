@@ -77,16 +77,26 @@
 (defn message-value		[message]	(get-in message [:content :value]))
 ,,
 (defn message-header		[message]	(get-in message [:header]))
+(defn message-date		[message]	(get-in message [:header :date]))
+(defn message-msg-id		[message]	(get-in message [:header :msg_id]))
 (defn message-msg-type		[message]	(get-in message [:header :msg_type]))
 (defn message-session		[message]	(get-in message [:header :session]))
 (defn message-username		[message]	(get-in message [:header :username]))
+(defn message-version		[message]	(get-in message [:header :version]))
 ,,
-(defn message-buffers		[message]	(let [bufs (get-in message [:buffers])] (.-buffers bufs)))
+(defn message-buffers		[message]	(.-buffers (get-in message [:buffers])))
 (defn message-delimiter		[message]	(get-in message [:delimiter]))
-(defn message-envelope		[message]	(let [pfr (get message :preframes)] (.-envelope pfr)))
+(defn message-envelope		[message]	(.-envelope (get message :preframes)))
 (defn message-metadata		[message]	(get-in message [:metadata]))
+(defn message-signature		[message]	(.-signature (get message :preframes)))
+,,
 (defn message-parent-header	[message]	(get-in message [:parent-header]))
-(defn message-signature		[message]	(let [pfr (get message :preframes)] (.-signature pfr)))
+(defn message-parent-date	[message]	(get-in message [:parent-header :date]))
+(defn message-parent-msg-id	[message]	(get-in message [:parent-header :msg_id]))
+(defn message-parent-msg-type	[message]	(get-in message [:parent-header :msg_type]))
+(defn message-parent-session	[message]	(get-in message [:parent-header :session]))
+(defn message-parent-username	[message]	(get-in message [:parent-header :username]))
+(defn message-parent-version	[message]	(get-in message [:parent-header :version]))
 
 ;;; ------------------------------------------------------------------------------------------------------------------------
 ;;; JupMsgPreframes
@@ -193,13 +203,13 @@
               (fn [idx v]
                 (let [path' (conj path idx)]
                   (cond
+                    (pred v)
+                    ,, (do (swap! T conj [(-> path' rest vec) v]) ;; :dummy removed by `rest`
+                           (f v))
                     (vector? v)
                     ,, (mapv (inner path') (range) v)
                     (map? v)
                     ,, (reduce-kv (fn [Σ k v] (assoc Σ k ((inner path') k v))) {} v)
-                    (pred v)
-                    ,, (do (swap! T conj [(-> path' rest vec) v]) ;; :dummy removed by `rest`
-                           (f v))
                     :else
                     ,, v))))]
       [((inner []) :dummy v)
@@ -236,20 +246,9 @@
     (reduce (fn [Σ [path v]] (insert-by-path Σ path v))
             jupyter-message path-value-map)))
 
-(defn extract-kernel-response-byte-arrays
-  "Returns the result of extract any byte-arrays from messages with COMM state."
-  [{:keys [rsp-content] :as kernel-rsp}]
-  (let [state-path  [:data :state]
-        bufpath-path [:data :buffer_paths]]
-    (if-let [state (get-in rsp-content state-path)]
-      (let [[state' pathmap] (leaf-paths bytes? (constantly "replaced") state)
-            paths (vec (keys pathmap))
-            buffers (mapv (p get pathmap) paths)
-            rsp-content' (-> rsp-content
-                             (assoc-in state-path state')
-                             (assoc-in bufpath-path paths))]
-        (assoc kernel-rsp :rsp-content rsp-content' :rsp-buffers buffers))
-      kernel-rsp)))
+
+
+
 
 ;;; ------------------------------------------------------------------------------------------------------------------------
 ;;; FRAMES <-> JUPMSG
@@ -314,7 +313,6 @@
           byte-buffers	(when buffers
                           (.-buffers buffers))]
         (assert (s/valid? ::sp/byte-arrays envelope))
-        (log/debug "jupmsg->frames: " [:bufcount (count byte-buffers)])
         (->> (concat envelope
                      [u/IDSMSG-BYTES (u/get-bytes signature)]
                      (mapv u/get-bytes payload-vec)
@@ -374,7 +372,7 @@
   {:comm_id comm-id, :data data})
 
 (sdefn comm-info-reply-content
-  (s/cat :comm-id-target-name-map (s/map-of ::comm-id ::target-name))
+  (s/cat :comm-id-target-name-map (s/map-of ::comm-id ::target_name))
   [comm-id-target-name-map]
   {:status "ok" :comms (->> (for [[comm-id target-name] comm-id-target-name-map]
                               [comm-id {:target_name target-name}])
@@ -419,21 +417,21 @@
   {:code code, :cursor_pos cursor-pos})
 
 (sdefn display-data-content
-  (s/cat :model-id ::uuid :opts (s/? (s/keys :opt-un [::metadata ::transient? ::version-major ::version-minor])))
-  ([model-id]
-   (display-data-content model-id {}))
-  ([model-id {:keys [metadata transient? version-major version-minor]}]
+  (s/cat :model-id ::uuid :opts (s/? (s/keys :opt-un [::metadata ::transient ::version-major ::version-minor])))
+  ([model-ref]
+   (display-data-content model-ref {}))
+  ([model-ref {:keys [metadata transient version-major version-minor]}]
    (let [version-major (or version-major WIDGET-PROTOCOL-VERSION-MAJOR)
-         version-minor (or version-minor WIDGET-PROTOCOL-VERSION-MINOR)]
+         version-minor (or version-minor WIDGET-PROTOCOL-VERSION-MINOR)
+         metadata (or metadata {})
+         transient (or transient {})]
      (merge {:data {:application/vnd.jupyter.widget-view+json
-                    {:model_id model-id
+                    {:model_id model-ref
                      :version_major version-major
                      :version_minor version-minor}
-                    :text/plain (str "display_data: " model-id)}}
-            (when metadata
-              {:metadata metadata})
-            (when transient?
-              {:transient (boolean transient?)})))))
+                    :text/plain (str "display_data: " model-ref)}
+             :metadata metadata
+             :transient transient}))))
 
 (sdefn error-message-content
   (s/cat :exe-count ::msp/execution_count)
@@ -580,6 +578,25 @@
   (s/cat)
   []
   {})
+
+(declare update-comm-msg)
+(sdefn output-set-msgid-content
+  (s/cat :comm-id ::comm-id :msgid string?)
+  [comm-id msgid]
+  (let [state {:msg_id msgid}]
+    (comm-msg-content comm-id state)))
+
+(sdefn output-update-content
+  (s/cat :comm-id ::comm-id
+         :target-name ::target_name
+         :stream-name #{"stdout" "stderr"}
+         :strings (s/coll-of string? :kind vector?))
+  [comm-id method target-name stream-name strings]
+  (let [state {:outputs (vec (for [s strings]
+                               {:name stream-name,
+                                :text s,
+                                :output_type "stream"}))}]
+    (update-comm-msg comm-id method target-name state)))
 
 (sdefn shutdown-reply-content
   (s/cat :restart? boolean?)
