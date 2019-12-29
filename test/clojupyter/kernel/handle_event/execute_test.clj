@@ -70,7 +70,6 @@
                 (= code history-data))))))
  => true)
 
-
 (fact
  "read-line works and is correctly ordered wrt other side-effects"
  (log/with-level :error
