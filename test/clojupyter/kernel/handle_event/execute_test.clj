@@ -1,14 +1,17 @@
 (ns clojupyter.kernel.handle-event.execute-test
   (:require [clojupyter.kernel.cljsrv :as srv]
+            [clojupyter.kernel.core-test :as core-test]
             [clojupyter.kernel.handle-event.execute :as execute]
             [clojupyter.kernel.handle-event.shared-ops :as sh]
             [clojupyter.kernel.init :as init]
+            [clojupyter.kernel.jup-channels :as jup]
             [clojupyter.log :as log]
             [clojupyter.messages :as msgs]
             [clojupyter.messages-specs :as msp]
             [clojupyter.test-shared :as ts]
+            [clojure.core.async :as async]
             [clojure.spec.alpha :as s]
-            [io.simplect.compose :refer [C p]]
+            [io.simplect.compose :refer [def- c C p P ]]
             [io.simplect.compose.action :as a]
             [midje.sweet :as midje :refer [=> fact]]))
 
@@ -65,3 +68,26 @@
                 (= input-exe-count reply-exe-count result-exe-count)
                 (= code history-data))))))
  => true)
+
+
+(comment
+  (log/with-level :debug
+    (let [[ctrl-in ctrl-out shell-in shell-out io-in io-out stdin-in stdin-out]
+          ,, (repeatedly 8 #(async/chan 25))
+          jup (jup/make-jup ctrl-in ctrl-out shell-in shell-out io-in io-out stdin-in stdin-out)]
+      (async/>!! stdin-in {:req-message ((ts/s*message-header msgs/INPUT-REPLY) (msgs/input-reply-content "input-1"))})
+      (async/>!! stdin-in {:req-message ((ts/s*message-header msgs/INPUT-REPLY) (msgs/input-reply-content "input-2"))})
+      (init/ensure-init-global-state!)
+      (with-open [srv (srv/make-cljsrv)]
+        (let [code "(println (list 1 2 3)) (println (read-line)) (println 123) (println (str \"Read from stdin: \" (read-line))) 14717"
+              msg ((ts/s*message-header msgs/EXECUTE-REQUEST)
+                   (merge (ts/default-execute-request-content) {:code code}))
+              port :shell_port
+              req {:req-message msg, :req-port port, :cljsrv srv, :jup jup}
+              ;; note: execute/, not dispatch/: -- execute is in a separate process
+              {:keys [enter-action leave-action] :as rsp} (execute/eval-request req)
+              specs (a/step-specs leave-action)]
+          (.invoke leave-action)
+          (->> (core-test/on-outbound-channels jup)
+               (map (P dissoc :req-message :rsp-metadata))))))))
+
