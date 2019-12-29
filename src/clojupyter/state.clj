@@ -143,15 +143,6 @@
         ctx)
     (throw (ex-info "pop-context! - empty stack" {:STATE @STATE}))))
 
-(defn swap-context!
-  "Replace top of context stack with the result of applying `f` to it."
-  [f]
-  (swap! STATE (P update :cur-ctx
-                  (fn [[cur & ctxs]]
-                    (cons (f cur) ctxs)))))
-
-(println "state.clj:			eliminate `swap-context!`?")
-
 (defmacro with-current-context
   [[ctx] & body]
   `(try (push-context! ~ctx)
