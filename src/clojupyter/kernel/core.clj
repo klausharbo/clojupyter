@@ -109,9 +109,6 @@
       (logging-transducer (str "OUTBOUND:" port))
       (wrap-skip-shutdown-tokens (fn [jupmsg] (msgs/jupmsg->frames jupmsg))))))
 
-(println "core.clj:			clean up outbound-channel-transducer")
-(println "core.clj:			move transducers to separate namespace?")
-
 (defn- start-zmq-socket-forwarding
   "Starts threads forwarding traffic between ZeroMQ sockets and core.async channels.  Returns a
   2-tuple of `jup` and `term` which respectively provide access to communicating with Jupyter and
