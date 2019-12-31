@@ -41,8 +41,8 @@
 (def INPUT-REPLY		"input_reply")
 (def INSPECT-REPLY		"inspect_reply")
 (def INSPECT-REQUEST		"inspect_request")
-(def INTERRUPT-REPLY		"interrupt_reply")		;; not used - signals instead
-(def INTERRUPT-REQUEST		"interrupt_request")		;; not used - signals instead
+(def INTERRUPT-REPLY		"interrupt_reply")
+(def INTERRUPT-REQUEST		"interrupt_request")
 (def IS-COMPLETE-REPLY		"is_complete_reply")
 (def IS-COMPLETE-REQUEST	"is_complete_request")
 (def KERNEL-INFO-REPLY		"kernel_info_reply")
@@ -449,7 +449,7 @@
   ([status execution-count {:keys [ename evalue traceback] :as opts}]
    (let [ename (or ename "Error name not available.")
          evalue (or evalue "")
-         traceback (or traceback ["Traceback not available."])]
+         traceback (or traceback ["(no stacktrace)"])]
      (merge {:status status, :execution_count execution-count}
             (case status
               "ok"	{:user_expressions {}}
@@ -534,15 +534,13 @@
    (merge {:code code, :cursor_pos cursor-pos}
           (when details? {:detail_level 1}))))
 
-(defn- interrupt-reply-content
-  "Not used - signals are used by Jupyter to communicate interrupts."
+(defn interrupt-reply-content
   []
-  (throw (Exception. "Interrupt reply messages are not used by Clojupyter.")))
+  {})
 
-(defn- interrupt-request-content
-  "Not used - signals are used by Jupyter to communicate interrupts."
+(defn interrupt-request-content
   []
-  (throw (Exception. "Interrupt request messages are not used by Clojupyter.")))
+  {})
 
 (sdefn is-complete-reply-content
   (s/cat :status ::status)
