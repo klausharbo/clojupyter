@@ -2,6 +2,7 @@
 
 ## v0.2.4 (work-in-progress)
 
+* Remove icon customization options `--icon-top`, `--icon-top`, and `--customize-icons`.
 * Add IPYWIDGET definitions (preliminary - most things don't work yet)
 * Add `comm_atom` representing the state of COMM objects synchronized with the Jupyter COMM model
   manager.
