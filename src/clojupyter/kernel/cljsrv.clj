@@ -34,8 +34,6 @@
   (nrepl-server-addr [cljsrv])
   (nrepl-trace [cljsrv]))
 
-(println "cljsrv.clj:			consider adding state to make sure that continuing eval makes sense")
-
 ;;; ------------------------------------------------------------------------------------------------------------------------
 ;;; COLJUPYTER NREPL HANDLER
 ;;; ------------------------------------------------------------------------------------------------------------------------
@@ -80,7 +78,7 @@
   stops either when we get to the final message of the repl (`:status` one of \"done\", \"error\" or
   \"interrupted\") or the NREPL server indicates it needs input from the user (`:status` equals
   \"need-input\")."
-  [get-stacktrace-fn msg-seq]
+  [get-stacktrace-fn pending-input? msg-seq]
   (loop [ms msg-seq, msgs [], result {:need-input false}, iter 10]
     (if (seq ms)
       (let [msg (first ms)
@@ -90,7 +88,9 @@
           ,, (assoc result :nrepl-messages msgs')
           (need-input-message? msg)
           ;; use `delay` to prevent accidental inspection or printing blocking on nrepl message stream:
-          ,, (assoc result :need-input true :delayed-msgseq (delay (next ms)) :nrepl-messages msgs)
+          ,, (do
+               (reset! pending-input? true)
+               (assoc result :need-input true :delayed-msgseq (delay (next ms)) :nrepl-messages msgs))
           (exception-message? msg)
           ,, (recur (rest ms) msgs' (assoc result :trace-result (get-stacktrace-fn)) (dec iter))
           :else
@@ -98,7 +98,7 @@
       (throw (ex-info (str "messages-result - internal error: we should not get to end of nrepl stream without 'done' msg")
                {:msgs msgs, :result result})))))
 
-(defrecord CljSrv [nrepl-server_ nrepl-client_ nrepl-sockaddr_]
+(defrecord CljSrv [nrepl-server_ nrepl-client_ nrepl-sockaddr_ pending-input?_]
   nrepl-server-proto
 
   (nrepl-complete
@@ -110,7 +110,8 @@
 
   (nrepl-continue-eval
     [cljsrv msgseq]
-    (messages-result #(nrepl-trace cljsrv) msgseq))
+    (assert (not @pending-input?_))
+    (messages-result #(nrepl-trace cljsrv) pending-input?_ msgseq))
 
   (nrepl-doc
     [_ sym]
@@ -127,7 +128,9 @@
 
   (nrepl-provide-input
     [cljsrv input-string]
+    (assert @pending-input?_)
     (nrepl/message nrepl-client_ {:op "stdin" :stdin (str input-string \newline)})
+    (reset! pending-input?_ false)
     input-string)
 
   (nrepl-interrupt
@@ -173,6 +176,6 @@
         nrepl-base-client	(nrepl/client nrepl-transport Integer/MAX_VALUE)
         nrepl-client		(nrepl/client-session nrepl-base-client)
         nrepl-sockaddr		(.getLocalSocketAddress ^java.net.ServerSocket (:server-socket nrepl-server))
-        cljsrv 			(->CljSrv nrepl-server nrepl-client nrepl-sockaddr)]
+        cljsrv 			(->CljSrv nrepl-server nrepl-client nrepl-sockaddr (atom false))]
     (log/info (str "Started NREPL server: tcp:/" nrepl-sockaddr "."))
     cljsrv))

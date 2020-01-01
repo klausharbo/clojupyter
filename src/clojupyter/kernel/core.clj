@@ -1,7 +1,6 @@
 (ns clojupyter.kernel.core
   (:gen-class)
-  (:require beckon
-            [clojupyter.kernel.cljsrv :as cljsrv]
+  (:require [clojupyter.kernel.cljsrv :as cljsrv]
             [clojupyter.kernel.comm-atom :as ca]
             [clojupyter.kernel.config :as config]
             [clojupyter.kernel.handle-event-process :as hep :refer [start-handle-event-process]]
@@ -30,18 +29,11 @@
                (assert svc (str "core/address: " service " not found"))
                (str (:transport config) "://" (:ip config) ":" svc)))))
 
-(defn- set-interrupt-handler
-  [cljsrv]
-  (reset! (beckon/signal-atom "INT")
-          [#(log/debug "interrupt received")
-           #(cljsrv/nrepl-interrupt cljsrv)]))
-
 (defn run-kernel
   [jup term cljsrv]
   (state/ensure-initial-state!)
   (u!/with-exception-logging
       (let [proto-ctx {:cljsrv cljsrv, :jup jup, :term term}]
-        (set-interrupt-handler cljsrv)
         (start-handle-event-process proto-ctx))))
 
 (s/fdef run-kernel
@@ -108,9 +100,6 @@
           (fn [krsp] (msgs/kernelrsp->jupmsg port signer krsp))))
       (logging-transducer (str "OUTBOUND:" port))
       (wrap-skip-shutdown-tokens (fn [jupmsg] (msgs/jupmsg->frames jupmsg))))))
-
-(println "core.clj:			clean up outbound-channel-transducer")
-(println "core.clj:			move transducers to separate namespace?")
 
 (defn- start-zmq-socket-forwarding
   "Starts threads forwarding traffic between ZeroMQ sockets and core.async channels.  Returns a

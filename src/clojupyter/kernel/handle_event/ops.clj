@@ -61,7 +61,6 @@
   [get-action-fn]
   (fn [ctx]
     (let [action (get-action-fn ctx)
-          _ (log/debug "invoke-action invoking: " (log/ppstr action))
           evaluated-action (action)]
       (if (a/success? evaluated-action)
         (-> (set-enter-action ctx evaluated-action)

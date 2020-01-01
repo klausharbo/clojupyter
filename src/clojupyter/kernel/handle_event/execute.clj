@@ -14,9 +14,6 @@
             [io.simplect.compose :refer [C def- p P]]
             [io.simplect.compose.action :as a :refer [action step]]))
 
-(use 'clojure.pprint)
-(println "execute.clj:			remove use pprint")
-
 ;;; ------------------------------------------------------------------------------------------------------------------------
 ;;; STATE OPS
 ;;; ------------------------------------------------------------------------------------------------------------------------
@@ -199,24 +196,19 @@
   ([ctx]
    (eval-request ctx [ic*eval-code]))
   ([ctx interceptors]
-   (loop [iter 0
-          {:keys [nrepl-eval-result] :as ctx'}
+   (loop [{:keys [nrepl-eval-result] :as ctx'}
           ,, (ich/execute (-> ctx
-                              (assoc :iter iter)
                               (ops/set-enter-action (action nil)))
                           (conj interceptors ops/enter-action-interceptor))]
      (let [{:keys [need-input delayed-msgseq]} nrepl-eval-result]
-       (assert (< iter 100) "execute/eval-request: max number iters exceeded")
        (if need-input
          (let [ctx'' ((ops/invoke-action ops/get-leave-action) ctx')]
-           (recur (inc iter)
-                  (ich/execute (-> ctx''
+           (recur (ich/execute (-> ctx''
                                    (update :leave-actions (fnil conj []) (ops/get-leave-action ctx''))
                                    (dissoc :need-input)
-                                   (assoc :iter iter :delayed-msgseq delayed-msgseq)
+                                   (assoc :delayed-msgseq delayed-msgseq)
                                    (ops/set-enter-action (action nil))
                                    (ops/set-leave-action (action nil)))
                                [ic*provide-input ops/enter-action-interceptor])))
          ctx')))))
 
-(println "execute.clj:			remove max-iter from eval-request")
